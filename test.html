@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>小场景测试</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #container {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #control {
+      font-size: 14px;
+      color: #fff;
+      padding: 0 20px;
+      box-sizing: border-box;
+      user-select: none;
+      cursor: auto;
+      background-color: rgba(0, 0, 0, .5);
+      position: fixed;
+      right: 30px;
+      top: 30px;
+      display: flex;
+      align-items: center;
+      user-select: none;
+      z-index: 2 !important;
+    }
+
+    #control dl dd {
+      margin-top: 10px;
+      margin-inline-start: 20px;
+    }
+
+    input {
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <div id="Stats-output"></div>
+
+  <div id="cesiumContainer" class="fullSize"></div>
+
+  <div id="parameter">
+    <button type="button" id="start" onclick="start()">起飞</button>
+    <button type="button" id="moveForward" onclick="moveForward()">前进</button>
+    <button type="button" id="moveBack" onclick="moveBack()">后退</button>
+    <button type="button" id="turnLeft" onclick="turnLeft()">左转</button>
+    <button type="button" id="turnRight" onclick="turnRight()">右转</button>
+    <button type="button" id="up" onclick="up()">拉升</button>
+    <button type="button" id="down" onclick="down()">下降</button>
+    <button type="button" id="moveDown" onclick="moveDown()">俯冲</button>
+    <button type="button" id="turnRight" onclick="stop()">悬停</button>
+    <lable>飞行速度(KM/H)：<input type="text" id="speed" style="width:50px" value="500"></label>
+      <lable>heading(Degree)：<input type="text" id="turnSpeed" style="width:50px" value="0.5"></label>
+
+
+  </div>
+</body>
+<!-- 儋州线上 -->
+<!-- <script src="https://map-test.airlook.com/open/auth/api/service/amapmobile?v=1.0.006&appKey=7e3aa05dd28eca88aebac6697635ccb8"></script> -->
+<!-- <script src="../Build/AMap.js?appKey=7e3aa05dd28eca88aebac6697635ccb8"></script> -->
+<!-- <script src="https://unpkg.com/vue/dist/vue.js"></script> -->
+<!-- <script src="../Build/1.0.003/AMap.js"></script> -->
+<script src="https://map.airlook.com/open/auth/api/service/amapmobile?v=1.0.005&appKey=e1f9517001eaa3471d5af265dd5f7048"></script>
+<script src="./1.0.006/AMap.js"></script>
+<script src="../lib/dat.gui.min.js"></script>
+<!-- <script type="text/javascript" src="https://raw.github.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script> -->
+<script >
+
+    var map = new AirlookMap.Map("container")
+    const fromDegrees = AirlookMap.Cartographic.fromDegrees;
+    const QUINTIC_IN_OUT = AirlookMap.EasingFunction.QUINTIC_IN_OUT;
+    const fromCartographics = AirlookMap.BoundingSphere.fromCartographics;
+    map.readyPromise.then(function (view) {
+      var res = view.setView({
+        // center: new AirlookMap.Cartographic.fromDegrees(109.58293520254264, 19.519364517653536, 500),    //儋州      
+        center: fromDegrees(100.23848506577119,26.871084980034272, 3000),    //丽江      
+        radius: 2000,
+        maxCameraHeight: 4000,
+        shadows: false,
+      });
+
+      var marker1 = new AirlookMap.Marker({
+        position: fromDegrees(100.24146629518056, 26.87178535728324, 2584.0673533831427),
+        scaleByDistance: new AirlookMap.NearFarScalar(100, 1, 2000, 0.5),
+        show: true,
+        label: '儋州市政府大楼',
+        onClick: function (e) {
+          console.log(e.id);
+          console.log(e.position);
+        }
+      });
+      map.add(marker1);
+
+      map.tileset.requestAreaDdata=true;
+      map.collisionDetection = false; //碰撞检测
+      map.requestRenderMode = true; //是否分时渲染
+      map.camera.minPitch = THREE.Math.degToRad(30); // 设置相机 pitch
+      map.time = AirlookMap.Time.fromDate(new Date("2020-12-21T10:30:00"));
+      setInterval(function(){
+        map.time.addMinutes(15);
+      }, 1000);
+
+    });
+    // map.stats = true;
+    map.tilesLoaded.addEventListener(function (e) {
+      console.log(map.skySphere.show);
+      // console.log(map.collisionDetection);
+      // console.log(map.shadows);
+      // console.log(map.stats);
+      console.log("地图已加载完毕！！！！");
+    });
+    // map.stats = true;
+    // var points = [];
+    // var p1 = new AirlookMap.Cartographic.fromDegrees(100.23848506577119,26.871084980034272, 500);
+    // var p2 = new AirlookMap.Cartographic.fromDegrees(100.23248506577119,26.871084980034272, 500);
+    // var p3 = new AirlookMap.Cartographic.fromDegrees(100.23248506577119,26.869084980034272, 500);
+    // var p4 = new AirlookMap.Cartographic.fromDegrees(100.23848506577119,26.869084980034272, 500);
+
+    // points.push(p1);
+    // points.push(p2);
+    // points.push(p3);
+    // points.push(p4);
+
+
+    // var flowline = new AirlookMap.PolylineTrailLink({
+    //     positions: points,
+    //     imageUrl: "./assets/colors.png",
+    //     color: 0xff0000,//rgb(255,0,0)/0xff0000/'red'· 
+    //     opacity: 1, //透明度
+    //     depthTest: true, //遮挡效果
+    //     speed: 1000, //纹理流动速度
+    //     show: true
+    //   });
+
+    // map.add(flowline)
+
+    const flyTo = new function() {
+      this.longitude = '100.23848506577119';
+      this.latitude = '26.871084980034272';
+      this.height = '3000';
+
+      this.flyTo = () => {
+        map.camera.flyTo({
+        destination: fromDegrees(this.longitude.parseFloat(), this.latitudeparseFloat(), this.height.parseFloat()),
+        duration: 4,
+        orientation: {
+          heading: AirlookMap.CesiumMath.toRadians(40),
+          pitch: AirlookMap.CesiumMath.toRadians(70),
+          easingFunction: QUINTIC_IN_OUT
+        }
+      }).then(function () {
+        console.log("flyTo complete");
+      })
+      }
+    }
+
+    var gui = new dat.GUI();
+    gui.domElement.addEventListener('mousedown',  function(event){
+      event.stopImmediatePropagation();//阻止其他事件处理程序被调用
+    }, false);
+    gui.domElement.addEventListener('mousewheel', function(event){
+      event.stopImmediatePropagation();//阻止其他事件处理程序被调用
+    }, false);
+
+    // map.shade = true;
+    var skyspherecontrol={     
+      status: true,
+      shade: true,
+      skysphere: true,
+      height: 0.5,
+      pitch: 10,
+      shadows: false,
+      collisionDetection: false,
+    };
+   
+    var skyfolder = gui.addFolder("天空球")
+    // 默认值设置
+    var dropdown= { 纹理: 'no' };
+    //选项
+    var states = ['yes', 'no'];
+
+    skyfolder.add( dropdown, '纹理' ).options( states ).onChange( function (status) {
+      console.log(states);          
+      if(status === 'yes'){
+        map.skySphere =  new AirlookMap.SkySphere('./assets/skysphere1.jpg') ;    
+      }else{
+        map.skySphere =  new AirlookMap.SkySphere() ;   
+      }
+      console.log(map.skySphere.show);
+    } );
+
+    skyfolder.add(skyspherecontrol, "status").name('是否开启').onChange(function(){
+      map.skySphere.show = skyspherecontrol.status;
+      console.log(map.skySphere.show)
+    });
+
+    var polyLine = gui.addFolder('流动线');
+    var polyLineControl = {
+      color: 0xff0000,//rgb(255,0,0)/0xff0000/'red'· 
+      opacity: 1, //透明度
+      depthTest: true, //遮挡效果
+      speed: 1000, //纹理流动速度
+      show: true
+    };
+
+    const camera = gui.addFolder('相机');
+    camera.add(flyTo, 'longitude').name('经度');
+    camera.add(flyTo, 'latitude').name('维度');
+    camera.add(flyTo, 'height').name('高度');
+    camera.add(flyTo, 'flyTo').name('相机飞行');
+
+    var other = gui.addFolder('其他');
+    other.add(skyspherecontrol, 'collisionDetection').name("碰撞检测").onChange(function(){
+      map.collisionDetection = skyspherecontrol.collisionDetection; //碰撞检测
+    });
+
+    other.add(skyspherecontrol, 'shade').name("遮罩").onChange(function(){
+      map.mask = skyspherecontrol.shade;
+    });
+
+    other.add(skyspherecontrol, 'shadows').name("阴影").onChange(function(){
+      map.time = AirlookMap.Time.fromDate(new Date("2020-12-21T10:30:00"));
+      map.shadows = skyspherecontrol.shadows;
+    });
+
+    other.add(skyspherecontrol,'height', 0.01, 5).name("最大高度(KM)").onFinishChange(function(value){
+        map.camera.maxHeight = skyspherecontrol.height * 1000;
+    });
+    
+    other.add(skyspherecontrol,'pitch', 10, 90).name("最小俯仰").onFinishChange(function(value){
+        map.camera.minPitch =THREE.Math.degToRad( skyspherecontrol.pitch );
+    });  
+  </script>
+
+
+</html>

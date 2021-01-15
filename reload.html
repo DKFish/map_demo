@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="./stats.min.js "></script>
+    <!--儋州-->
+    <script src="https://map.airlook.com/open/auth/api/service/amapmobile?v=1.0.002&appKey=5882b74ad6465c6b8101eea51212d48c"></script>
+
+    </script>
+
+    <script type="text/javascript " src="./jquery-1.11.3.js "></script>
+    <link rel="stylesheet" type="text/css" href="./css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="./css/index.css" />
+    <link rel="stylesheet" type="text/css" href="./miniscene.css" />
+    <title>内部本地测试用</title>
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div id="Stats-output"></div>`
+    <div id="parameter">
+        <div id="mapdestory">
+            <button type="button" class="reload" onclick="reload()">重新加载</button>
+        </div>
+</body>
+
+<script>
+    //初始化地图对象
+    map = new AirlookMap.Map("container");
+    var ambientLight;
+    var view;
+    map.readyPromise.then(function(viewer) {
+        // var minicenter = new AirlookMap.Cartographic.fromDegrees(117.17558037729528, 39.12400489486837, 1000);//天津
+        var minicenter = new AirlookMap.Cartographic.fromDegrees(109.58296420013482, 19.5113566478344, 1200); //儋州
+        // var minicenter = new AirlookMap.Cartographic.fromDegrees(119.96399990925892, 30.524636772842342, 1200); //德清
+        view = viewer;
+        //场景定位
+        var str = view.setView({
+            center: minicenter,
+            radius: 2000,
+            maxCameraHeight: 4000
+        });
+        map.collisionDetection = true; //开启碰撞检测
+        view.tileset.requestAreaData  = false; //只请求区域内数据
+        view.requestRenderMode  = false;  //开启分时渲染
+    });
+
+
+    function reload() {
+
+        map.destroy();
+        alert("地图已销毁，现在重现map");
+        console.log("参数不全，经纬度和高度默认值");
+        // alert("参数不全,请补全参数！");
+        // var  positionsB  = AirlookMap.Cartographic.fromDegrees(117.18153997464413, 39.12744707054671, 300);  //测试环境天津数据
+        var  positionsB  = AirlookMap.Cartographic.fromDegrees(109.58296420013482, 19.5113566478344, 1200); //儋州
+        var localradius = 2000;
+        var localmaxCameraHeight = 4000;
+
+        map = new AirlookMap.Map("container");
+        console.log(positionsB);
+        console.log(localradius);
+        console.log(localmaxCameraHeight);
+        map.readyPromise.then(function(viewer) {
+            view = viewer;
+            //场景定位
+            var str = view.setView({
+                center: positionsB,
+                radius: localradius,
+                maxCameraHeight: localmaxCameraHeight
+            });
+
+        });
+
+    }
+</script>
+
+</html>

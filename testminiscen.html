@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="./lib/stats.min.js "></script>
+    <script src="https://map.airlook.com/open/auth/api/service/amapmobile?v=1.0.005&appKey=e1f9517001eaa3471d5af265dd5f7048"></script>
+    <script src="./1.0.006/AMap.js"></script>
+    <!-- 根据参数重新加载 -->
+    <script src="./js/reload.js"></script>
+    <!-- 环境光照及透明度 -->
+    <script src="./js/colorAndOpacity.js"></script>
+    <!-- 单体化 -->
+    <script src="./js/singleSample.js"></script>
+    <!-- 添加标注及自定义标注 -->
+    <script src="./js/addPolyline.js"></script>
+    <!-- 添加线 -->
+    <script src="./js/addMarker.js"></script>
+    <!-- 飞行及相机位置计算 -->
+    <script src="./js/flyAndCamera.js"></script>
+    <!-- 工具类 -->
+    <script src="./js/mathUtil.js"></script>
+    <!-- 查询类 -->
+    <script src="./js/localSearch.js"></script>
+    <!-- 路径规划，当前版本上线，不用测 -->
+    <!-- <script src="./routing.js">-->
+    </script>
+
+    <script type="text/javascript " src="./lib/jquery-3.5.1.js "></script>
+    <link rel="stylesheet" type="text/css" href="./css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="./css/index.css" />
+    <link rel="stylesheet" type="text/css" href="./miniscene.css" />
+    <title>内部本地测试用</title>
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div id="Stats-output"></div>`
+    <div id="parameter">
+        <form action="" method="get">
+            <div id="setview">
+                <!-- 场景定位
+                <lable>经度：<input type="text" name="lng" value="117.17558037729528"></label>
+                    <lable>纬度：<input type="text" name="lat" value="39.12400489486837"></label> -->
+                <lable>经度：<input type="text" name="lng" value="109.58296420013482"></label>
+                    <lable>纬度：<input type="text" name="lat" value="19.5193566478344"></label>
+                        <lable>高度：<input type="text" name="alt" value="500"></label>
+                            </br>
+                            <lable>半径：<input type="text" name="radius" value="2000"></label>
+                                <lable>最大相机高度：<input type="text" name="maxCameraHeight" value="4000" style="width: 50px;"></label>
+            </div>
+            <div id="datadetect">
+                数据碰撞检测
+                <lable><input type="radio" name="datadetect" checked="checked" value="yes">启用</label>
+                    <lable><input type="radio" name="datadetect" value="no">关闭</label>
+            </div>
+            <div id="requestRenderMode">
+                分时渲染
+                <lable><input type="radio" name="requestRenderMode" checked="checked" value="yes">启用</label>
+                    <lable><input type="radio" name="requestRenderMode" value="no">关闭</label>
+            </div>
+            <!-- <div id="dataorigin">
+                数据来源
+                <lable><input type="radio" name="dataorigin" checked="checked" value="tonline">测试环境</label>
+                    <lable><input type="radio" name="dataorigin" value="online">生产环境</label>
+            </div> -->
+            <div id="areadata">
+                是否只请求范围内数据
+                <lable><input type="radio" name="areadata" checked="checked" value="yes">是</label>
+                    <lable><input type="radio" name="areadata" value="no">否</label>
+            </div>
+            <div id="mapdestory">
+                <button type="button" class="destory" onclick="destorymap()">销毁地图</button>
+                <button type="button" class="reload" onclick="reload()">重新加载</button>
+            </div>
+            <div id="colorandintensity">
+                调整模型颜色强度
+                <lable>color：<input type="text" name="color"></label>
+                    <lable>intensity：<input type="text" name="intensity"></label>
+                        </br>
+                        <button type="button" id="Colorandopacity" onclick="fillColorandopacity()">调整模型颜色和透明度</button>
+            </div>
+            </br>
+            <div id="single">
+                <lable>单体化颜色 fillColor<input type="text" name="fillColor"></label>
+                    <lable>单体化透明度 opacity<input type="text" name="opacity"></label>
+                        </br>
+                        <button type="button" id="singlesample" onclick="displaysinglesample()">展示单体化</button>
+                        <button type="button" id="removesingle" onclick="removesinglesample()">隐藏单体化</button>
+                        <button type="button" id="destorysingle" onclick="destorysinglesample()">销毁单体化</button>
+                        <button type="button" id="searchsingle" onclick="searchValidatearea()">查询数据有效范围</button>
+            </div>
+
+            </br>
+            <div id="flyToBoundingSphere">
+                <button type="button" class="fly" onclick="flyToBSphere()">飞行定位(包围球)</button>
+                <button type="button" class="lookAt" onclick="lookTarget()">相机朝向目标点</button>
+                <button type="button" class="flyToTarget" onclick="flyTarget()">相机飞行到观察目标</button>
+                <button type="button" class="flyTo" onclick="flyTo()">飞行定位(相机位置)</button>
+                <button type="button" class="cameraPosition" onclick="fly()">计算相机位置</button>
+            </div>
+            </br>
+            <div id="cameraPosition">
+                <button type="button" class="fly" onclick="lookAtcameraPosition()">根据两个点计算相机位置及姿态</button>
+                <button type="button" class="lookAt" onclick="BoundingcameraPosition()">根据包围球计算相机位置</button>
+            </div>
+            </br>
+            <div id="distance">
+                <lable>起点经度：<input type="text" name="originlng" value="117.17874618728001" style="width:170px;"></label>
+                    <lable>起点纬度：<input type="text" name="originlat" value="39.134394607916335" style="width: 170px;"></label>
+                        <lable>起点高度：<input type="text" name="originalt" value="500" style="width: 50px;"></label>
+                            </br>
+                            <lable>终点经度：<input type="text" name="terminallng" value="117.17558798974024" style="width: 170px;"></label>
+                                <lable>终点纬度：<input type="text" name="terminallat" value="39.124145541031154" style="width: 170px;"></label>
+                                    <lable>终点高度：<input type="text" name="terminalalt" value="500" style="width: 50px;"></label>
+                                        </br>
+                                        <button type="button" class="countdistance" onclick="countdistance()">计算两点空间距离</button>
+            </div>
+            </br>
+            <div id="getheight">
+                <lable>经度：<input type="text" name="getheightlng" value="109.58530147915417" style="width:170px;"></label>
+                    <lable>纬度：<input type="text" name="getheightlat" value="19.518604168316094" style="width: 170px;"></label>
+
+                        <button type="button" class="getheightbutton" onclick="getheight()">根据经纬度查询高度</button>
+            </div>
+            </br>
+            <div id="overlayAMarker">
+                <button type="button" class="addpoi" onclick="addoverlay()">添加自定义标注</button>
+                <button type="button" class="removepoi" onclick="removeoverlay()">移除自定义标注</button>
+                <button type="button" class="destroypoi" onclick="destoryoverlay()">销毁自定义标注</button>
+                </br>
+            </div>
+            <div id="Marker">
+                <button type="button" class="addpoi" onclick="addpoi()">添加标注</button>
+                <button type="button" class="removepoi" onclick="removepoi()">移除标注</button>
+                <button type="button" class="destroypoi" onclick="destroypoi()">销毁标注</button>
+
+            </div>
+            </br>
+            <div id="Polyline">
+                <lable>线色:<input type="text" name="polyline"></label>
+                    <lable>线宽：<input type="text" name="lineWidth"></label>
+                        </br>
+                        <!-- 是否虚线
+                        <lable><input type="radio" name="dashed" checked="checked" value="true">是</label>
+                            <lable><input type="radio" name="dashed" value=false>否</label> -->
+
+                        是否遮挡
+                        <lable><input type="radio" name="depthTest" checked="checked" value="true">是</label>
+                            <lable><input type="radio" name="depthTest" value="false">否</label>
+                                </br>
+                                <button type="button" class="addpolyline" onclick="addpolyline()">添加线</button>
+                                <button type="button" class="removepolyline" onclick="removepolyline()">移除线</button>
+                                <button type="button" class="destorypolyline" onclick="destorypolyline()">销毁线</button>
+            </div>
+            </br>
+            <div id="Rout">
+                输入坐标类型：
+                <select id="coordType">
+                   <option value="bd09ll">百度经纬度坐标</option>
+                    <option value="bd09mc">百度墨卡托坐标</option>
+                    <option value="gcj02">国测局加密坐标</option>
+                    <option value="wgs84">gps设备获取的坐标</option>
+                </br>
+                    </select> 输出坐标类型：
+                <select id="retcoordType">
+                         <option value="bd09ll">百度经纬度坐标</option>
+                        <option value="gcj02">国测局加密坐标</option>
+                        </select>
+                </br>
+                <button type="button" class="walking" onclick="walking()">步行规划</button>
+                <button type="button" class="driving" onclick="driving()">驾车规划</button>
+                <button type="button" class="riding" onclick="riding()">骑行规划</button>
+                <button type="button" class="transit" onclick="transit()">公交规划</button>
+            </div>
+            <div id="clearRout">
+                <button type="button" class="clwalking" onclick="clearwalking()">清除步行规划</button>
+                <button type="button" class="cldriving" onclick="cleardriving()">清除驾车规划</button>
+                <button type="button" class="clriding" onclick="clearriding()">清除骑行规划</button>
+                <button type="button" class="clransit" onclick="cleartransit()">清除公交规划</button>
+            </div>
+
+    </div>
+    </form>
+</body>
+
+<script>
+    //初始化地图对象
+    map = new AirlookMap.Map("container");
+    var ambientLight;
+    // var view;
+    map.readyPromise.then(function(viewer) {
+        // var minicenter = new AirlookMap.Cartographic.fromDegrees(117.17558037729528, 39.12400489486837, 1000);//天津
+        var minicenter = new AirlookMap.Cartographic.fromDegrees(109.58296420013482, 19.5113566478344, 1200); //儋州
+        // var minicenter = new AirlookMap.Cartographic.fromDegrees(119.96399990925892, 30.524636772842342, 1200); //德清
+        // var minicenter = new AirlookMap.Cartographic.fromDegrees(100.23848506577119,26.871084980034272, 500);    //丽江  
+        //场景定位
+        var str = viewer.setView({
+            center: minicenter,
+            radius: 800,
+            maxCameraHeight: 1600
+        });
+        console.log(str);
+        map.collisionDetection = true; //开启碰撞检测
+        viewer.tileset.requestAreaData  = false; //只请求区域内数据
+        viewer.requestRenderMode  = false;  //开启分时渲染
+
+
+        // // min~max 设置相机俯仰角取值区间 [10,90], 单位十进制度 min默认30度 max 默认90度
+        // view.camera.setMinMaxPitch(10, 90);
+        // map.camera.setMinMaxPitch(AirlookMap.CesiumMath.toRadians(50), AirlookMap.CesiumMath.toRadians(90));
+
+        // // 当使用camera.setMinMaxPitch()方法设定限制相机俯仰角度范围后，若设置的camera.pitch的值不在该范围内,默认取设定限制区间的最大最小值
+        viewer.camera.pitch = AirlookMap.CesiumMath.toRadians(50);
+
+        // // 设置相机方位角最小最大值
+        // // camera.setMinMaxHeading(min,max,cross)true
+        // // min 相机最小旋转角(角度值)  单位十进制度 默认0度
+        // // max 相机最大旋转角(角度值)  单位十进制度 默认360度
+        // // cross 最小最大限制范围是否跨0/360度，默认true 值为true  限定范围控制为上半圆,否者限定范围控制为下半圆
+        // // min~max 取值区间 [0,360]
+        // view.camera.setMinMaxHeading(0, 180, false);
+        map.camera.setMinMaxHeading(AirlookMap.CesiumMath.toRadians(0), AirlookMap.CesiumMath.toRadians(360), false);
+
+        // //设置相机旋转角度  单位十进制度 默认范围0 ~ 360 度 最小值0度， 最大360度
+        // // 当使用camera.setMinMaxHeading()方法设定限制相机旋转角范围后，若设置的camera.heading的值不在该范围内,相机视角将违法旋转
+        // view.camera.heading = 0;
+        map.camera.heading = AirlookMap.CesiumMath.toRadians(0);
+
+        // //设置相机缩放
+        // // scale 数值Number类型 当前相机位置到屏幕中心点模型之间距离的比例值,取值范围[0.01~0.99][-0.99~-0.01]
+        // map.camera.setZoom(0.07);
+
+        //设置相机高度
+        // 相机高度单位：米;
+        // map.camera.height = 1200;
+
+
+        // //设置相机位置
+        // // 参数 new AirlookMap.Cartographic.fromDegrees(lng,lat,height);  height 高度单位为米; 若设置相机中心点位置不在有效范围 则相机位置不变     
+        // view.camera.positionCartographic = new AirlookMap.Cartographic.fromDegrees(109.58783930163423, 19.51892322063873, 1000)
+
+        // //设置相机视野角度
+        // map.camera.fov = 60;
+        //开启天空球
+        // map.skySphere =  new AirlookMap.SkySphere('./assets/skysphere1.jpg') ; 
+
+    });
+
+    map.stats = true;
+
+    // 测试地图加载完毕的生命周期回调接口
+    // map.tileset.allTilesLoaded.addEventListener(function(ee) {
+    //     console.log("所有模型已加载完毕！！！！" + ee);
+    // })
+
+    // // 测试地图加载完毕的生命周期回调接口
+    // map.tilesLoaded.addEventListener(function(e) {
+    //     console.log("地图已加载完毕！！！！ ");
+    // });
+    // setTimeout(function() {
+    //     map.destroy()
+    // }, 500);
+</script>
+
+</html>
