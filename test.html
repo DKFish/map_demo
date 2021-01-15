@@ -98,7 +98,7 @@
         position: fromDegrees(100.24146629518056, 26.87178535728324, 2584.0673533831427),
         scaleByDistance: new AirlookMap.NearFarScalar(100, 1, 2000, 0.5),
         show: true,
-        label: '儋州市政府大楼',
+        label: '塔吊',
         onClick: function (e) {
           console.log(e.id);
           console.log(e.position);
@@ -116,56 +116,29 @@
       }, 1000);
 
     });
+
     // map.stats = true;
     map.tilesLoaded.addEventListener(function (e) {
-      console.log(map.skySphere.show);
-      // console.log(map.collisionDetection);
-      // console.log(map.shadows);
-      // console.log(map.stats);
       console.log("地图已加载完毕！！！！");
     });
-    // map.stats = true;
-    // var points = [];
-    // var p1 = new AirlookMap.Cartographic.fromDegrees(100.23848506577119,26.871084980034272, 500);
-    // var p2 = new AirlookMap.Cartographic.fromDegrees(100.23248506577119,26.871084980034272, 500);
-    // var p3 = new AirlookMap.Cartographic.fromDegrees(100.23248506577119,26.869084980034272, 500);
-    // var p4 = new AirlookMap.Cartographic.fromDegrees(100.23848506577119,26.869084980034272, 500);
-
-    // points.push(p1);
-    // points.push(p2);
-    // points.push(p3);
-    // points.push(p4);
-
-
-    // var flowline = new AirlookMap.PolylineTrailLink({
-    //     positions: points,
-    //     imageUrl: "./assets/colors.png",
-    //     color: 0xff0000,//rgb(255,0,0)/0xff0000/'red'· 
-    //     opacity: 1, //透明度
-    //     depthTest: true, //遮挡效果
-    //     speed: 1000, //纹理流动速度
-    //     show: true
-    //   });
-
-    // map.add(flowline)
-
+    
     const flyTo = new function() {
       this.longitude = '100.23848506577119';
       this.latitude = '26.871084980034272';
       this.height = '3000';
 
       this.flyTo = () => {
-        map.camera.flyTo({
-        destination: fromDegrees(this.longitude.parseFloat(), this.latitudeparseFloat(), this.height.parseFloat()),
-        duration: 4,
-        orientation: {
-          heading: AirlookMap.CesiumMath.toRadians(40),
-          pitch: AirlookMap.CesiumMath.toRadians(70),
-          easingFunction: QUINTIC_IN_OUT
-        }
-      }).then(function () {
-        console.log("flyTo complete");
-      })
+          map.camera.flyTo({
+          destination: fromDegrees(parseFloat(this.longitude), parseFloat(this.latitude), parseFloat(this.height)),
+          duration: 4,
+          orientation: {
+            heading: AirlookMap.CesiumMath.toRadians(40),
+            pitch: AirlookMap.CesiumMath.toRadians(70),
+            easingFunction: QUINTIC_IN_OUT
+          }
+        }).then(function () {
+          console.log("flyTo complete");
+        })
       }
     }
 
@@ -219,10 +192,11 @@
     };
 
     const camera = gui.addFolder('相机');
-    camera.add(flyTo, 'longitude').name('经度');
-    camera.add(flyTo, 'latitude').name('维度');
-    camera.add(flyTo, 'height').name('高度');
-    camera.add(flyTo, 'flyTo').name('相机飞行');
+    const flyto = camera.addFolder('flyTo');
+    flyto.add(flyTo, 'longitude').name('经度');
+    flyto.add(flyTo, 'latitude').name('维度');
+    flyto.add(flyTo, 'height').name('高度');
+    flyto.add(flyTo, 'flyTo').name('相机飞行');
 
     var other = gui.addFolder('其他');
     other.add(skyspherecontrol, 'collisionDetection').name("碰撞检测").onChange(function(){
