@@ -78,10 +78,12 @@
 <script src="https://map.airlook.com/open/auth/api/service/amapmobile?v=1.0.005&appKey=e1f9517001eaa3471d5af265dd5f7048"></script>
 <script src="./1.0.006/AMap.js"></script>
 <script src="../lib/dat.gui.min.js"></script>
+<script src="js/camera.js"></script>
 <!-- <script type="text/javascript" src="https://raw.github.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script> -->
 <script >
 
-    var map = new AirlookMap.Map("container")
+  //地图加载
+    let map = new AirlookMap.Map("container")
     const fromDegrees = AirlookMap.Cartographic.fromDegrees;
     const QUINTIC_IN_OUT = AirlookMap.EasingFunction.QUINTIC_IN_OUT;
     const fromCartographics = AirlookMap.BoundingSphere.fromCartographics;
@@ -89,7 +91,7 @@
       var res = view.setView({
         // center: new AirlookMap.Cartographic.fromDegrees(109.58293520254264, 19.519364517653536, 500),    //儋州      
         center: fromDegrees(100.23848506577119,26.871084980034272, 3000),    //丽江      
-        radius: 2000,
+        radius: 1000,
         maxCameraHeight: 4000,
         shadows: false,
       });
@@ -98,49 +100,29 @@
         position: fromDegrees(100.24146629518056, 26.87178535728324, 2584.0673533831427),
         scaleByDistance: new AirlookMap.NearFarScalar(100, 1, 2000, 0.5),
         show: true,
-        label: '塔吊',
+        label: '基准点',
         onClick: function (e) {
           console.log(e.id);
           console.log(e.position);
         }
       });
       map.add(marker1);
-
       map.tileset.requestAreaDdata=true;
-      map.collisionDetection = false; //碰撞检测
+      map.collisionDetection = true; //碰撞检测
       map.requestRenderMode = true; //是否分时渲染
       map.camera.minPitch = THREE.Math.degToRad(30); // 设置相机 pitch
       map.time = AirlookMap.Time.fromDate(new Date("2020-12-21T10:30:00"));
       setInterval(function(){
         map.time.addMinutes(15);
+        // console.log(map.time);
       }, 1000);
-
     });
 
     // map.stats = true;
     map.tilesLoaded.addEventListener(function (e) {
       console.log("地图已加载完毕！！！！");
+      flyTo.flyTo();
     });
-    
-    const flyTo = new function() {
-      this.longitude = '100.23848506577119';
-      this.latitude = '26.871084980034272';
-      this.height = '3000';
-
-      this.flyTo = () => {
-          map.camera.flyTo({
-          destination: fromDegrees(parseFloat(this.longitude), parseFloat(this.latitude), parseFloat(this.height)),
-          duration: 4,
-          orientation: {
-            heading: AirlookMap.CesiumMath.toRadians(40),
-            pitch: AirlookMap.CesiumMath.toRadians(70),
-            easingFunction: QUINTIC_IN_OUT
-          }
-        }).then(function () {
-          console.log("flyTo complete");
-        })
-      }
-    }
 
     var gui = new dat.GUI();
     gui.domElement.addEventListener('mousedown',  function(event){
@@ -153,12 +135,7 @@
     // map.shade = true;
     var skyspherecontrol={     
       status: true,
-      shade: true,
-      skysphere: true,
-      height: 0.5,
-      pitch: 10,
-      shadows: false,
-      collisionDetection: false,
+      skysphere: true
     };
    
     var skyfolder = gui.addFolder("天空球")
@@ -182,43 +159,116 @@
       console.log(map.skySphere.show)
     });
 
-    var polyLine = gui.addFolder('流动线');
-    var polyLineControl = {
-      color: 0xff0000,//rgb(255,0,0)/0xff0000/'red'· 
-      opacity: 1, //透明度
-      depthTest: true, //遮挡效果
-      speed: 1000, //纹理流动速度
-      show: true
-    };
+    const polylineTrailLink = new function() {
 
-    const camera = gui.addFolder('相机');
-    const flyto = camera.addFolder('flyTo');
+      this.depthTest = true;
+
+      this.add = ()=>{
+        let p1 = fromDegrees(100.23192997696852, 26.875955651592196, 2559.80220466822);
+        let p2 = fromDegrees(100.23247717325768, 26.87602849887969, 2561.4129514450237);
+        let p3 = fromDegrees(100.23306656233609, 26.876065018168504, 2551.348304314218);
+        let p4 = fromDegrees(100.233649247421, 26.875980203232064, 2549.5592917467884);
+        let p5 = fromDegrees(100.2337299624449, 26.875523930248054, 2549.287945923655);
+        let p6 = fromDegrees(100.23374069875898, 26.87491457313319, 2550.196806815168);
+        let p7 = fromDegrees(100.23453038255734, 26.874635472560765, 2553.155838822433);
+        let p8 = fromDegrees(100.23519311121628, 26.875007161822932, 2556.511844229068);
+        let p9 = fromDegrees(100.2354684131796, 26.875676651534523, 2558.315293435401);
+        let p10 = fromDegrees(100.23499783582588, 26.87598575132799, 2559.716335356487);
+        let p11 = fromDegrees(100.23413925286674, 26.876243331935587, 2559.716335356487);
+        let p12 = fromDegrees(100.23358377580858, 26.87630712524129, 2551.5355235734714);
+        let points = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12];
+        let flowline = new AirlookMap.PolylineTrailLink({
+            positions: points,
+            imageUrl: "http://amapmobile.airlook.com/1.0.004/Assets/images/arrow.png",
+            color: 'red', //rgb(255,0,0)/0xff0000/'red'
+            lineWidth: 10,
+            opacity: 1,
+            depthTest: this.depthTest,
+            speed: 50,
+            show: true
+          });
+        map.add(flowline);
+      },
+
+      //TODO: 删除流动线，需要抽取JS
+      // this.destroy = ()=>{
+      //   map.destroy(flowline);
+      // }
+    }
+    
+    //流动线
+    var polylineTrailLinkControl = gui.addFolder('流动线');
+    polylineTrailLinkControl.add(polylineTrailLink, 'depthTest').name('深度检测');
+    polylineTrailLinkControl.add(polylineTrailLink, 'add');
+    // polylineTrailLinkControl.add(polylineTrailLink, 'destroy');
+
+
+    //相机操作
+    //碰撞检测回调
+    map.camera.collision.addEventListener(function(event){
+      console.log(event.position);
+    });
+
+    const cameraControl = gui.addFolder('相机');
+    const flyto = cameraControl.addFolder('flyTo');
+
     flyto.add(flyTo, 'longitude').name('经度');
     flyto.add(flyTo, 'latitude').name('维度');
     flyto.add(flyTo, 'height').name('高度');
+    flyto.add(flyTo, 'heading');
+    flyto.add(flyTo, 'pitch');
     flyto.add(flyTo, 'flyTo').name('相机飞行');
 
+    //
+    const flytoTarget = cameraControl.addFolder('flyToTarget');
+    flytoTarget.add(flyToTarget, 'longitude').name('经度');
+    flytoTarget.add(flyToTarget, 'latitude').name('维度');
+    flytoTarget.add(flyToTarget, 'height').name('高度');
+    flytoTarget.add(flyToTarget, 'distance').name('距离');
+    flytoTarget.add(flyToTarget, 'heading');
+    flytoTarget.add(flyToTarget, 'pitch');
+    flytoTarget.add(flyToTarget, 'flyToTarget').name('相机飞行');
+
+
+    const otherControl = {
+      collisionDetection: true,
+      shade: true,
+      shadows: false,
+      height: 0.5,
+      pitch: 10,
+      destroy: ()=>{
+        map.destroy();
+        reload();
+      }
+    }
+    //其他
     var other = gui.addFolder('其他');
-    other.add(skyspherecontrol, 'collisionDetection').name("碰撞检测").onChange(function(){
-      map.collisionDetection = skyspherecontrol.collisionDetection; //碰撞检测
+    other.add(otherControl, 'collisionDetection').name("碰撞检测").onChange(function(){
+      map.collisionDetection = otherControl.collisionDetection; //碰撞检测
     });
 
-    other.add(skyspherecontrol, 'shade').name("遮罩").onChange(function(){
-      map.mask = skyspherecontrol.shade;
+    other.add(otherControl, 'shade').name("遮罩").onChange(function(){
+      map.mask = otherControl.shade;
     });
 
-    other.add(skyspherecontrol, 'shadows').name("阴影").onChange(function(){
+    other.add(otherControl, 'shadows').name("阴影").onChange(function(){
       map.time = AirlookMap.Time.fromDate(new Date("2020-12-21T10:30:00"));
-      map.shadows = skyspherecontrol.shadows;
+      map.shadows = otherControl.shadows;
     });
 
-    other.add(skyspherecontrol,'height', 0.01, 5).name("最大高度(KM)").onFinishChange(function(value){
-        map.camera.maxHeight = skyspherecontrol.height * 1000;
+    other.add(otherControl,'height', 0.01, 5).name("最大高度(KM)").onFinishChange(function(value){
+        map.camera.maxHeight = otherControl.height * 1000;
     });
     
-    other.add(skyspherecontrol,'pitch', 10, 90).name("最小俯仰").onFinishChange(function(value){
-        map.camera.minPitch =THREE.Math.degToRad( skyspherecontrol.pitch );
-    });  
+    other.add(otherControl,'pitch', 10, 90).name("最小俯仰").onFinishChange(function(value){
+        map.camera.minPitch =THREE.Math.degToRad( otherControl.pitch );
+    });
+    
+    //销毁地图
+    other.add(otherControl, 'destroy');
+
+    //重新加载地图
+    
   </script>
 
 
