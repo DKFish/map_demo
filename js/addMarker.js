@@ -5,24 +5,7 @@ let poiOnClick = function(e) {
         console.log(e.id);
         console.log(e.position);
     };
-    //   天津poi
-    //   poi = new AirlookMap.Marker({
-    //       position: AirlookMap.Cartographic.fromDegrees(117.18121346875628, 39.127022871559014, 148.39310319291926),
-    //       label: "华门名筑1号楼",
-    //       scaleByDistance: new AirlookMap.NearFarScalar(200, 2, 1500, 0.5),
-    //       onClick: poiOnClick,
-    //       iconPath: "./location-marker.png",
-    //       show: true
-    //   })
-    //   poi2 = new AirlookMap.Marker({
-    //       position: AirlookMap.Cartographic.fromDegrees(117.18162461509256, 39.130622107989105, 252.04615252530382),
-    //       label: "金茂广场",
-    //       iconPath: " http://amapmobile-test.airlook.com/1.0.001/Assets/images/location-marker.png",
-    //       scaleByDistance:  new  AirlookMap.NearFarScalar(200, 2, 1500, 1),
-    //       onClick: poiOnClick,
-    //       show: true
-    //   })
-
+    
 // 儋州市poi
 poi = new AirlookMap.Marker({
     position: AirlookMap.Cartographic.fromDegrees(109.58952394747246, 19.518627769322595, 250),

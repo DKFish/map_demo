@@ -79,9 +79,9 @@
 <script src="./1.0.006/AMap.js"></script>
 <script src="../lib/dat.gui.min.js"></script>
 <script src="js/camera.js"></script>
+<script src="js/Markers.js"></script>
 <!-- <script type="text/javascript" src="https://raw.github.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script> -->
 <script >
-
   //地图加载
     let map = new AirlookMap.Map("container")
     const fromDegrees = AirlookMap.Cartographic.fromDegrees;
@@ -106,9 +106,15 @@
         onClick: function (e) {
           console.log(e.id);
           console.log(e.position);
+          // flyTo.destination = fromCartographics(100.234928752854000, 26.873662618427900, 2555.813280490890000);
+          flyTo.longitude = '100.234928752854000';
+          flyTo.latitude = '26.873662618427900';
+          flyTo.height = '2590.813280490890000';
+          flyTo.flyTo();
         }
       });
-      map.add(marker1);
+      map.add(BaseMarker);
+      addpoi();
       map.tileset.requestAreaDdata=true;
       map.collisionDetection = true; //碰撞检测
       map.requestRenderMode = true; //是否分时渲染
@@ -123,7 +129,6 @@
     // map.stats = true;
     map.tilesLoaded.addEventListener(function (e) {
       console.log("地图已加载完毕！！！！");
-      flyTo.flyTo();
     });
 
     var gui = new dat.GUI();
@@ -190,6 +195,33 @@
             show: true
           });
         map.add(flowline);
+        setTimeout(function(){
+          flowline.depthTest= false;
+          console.log(flowline.depthTest);
+        },5000);
+        setTimeout(function(){
+          flowline.speed= 100;
+          console.log(flowline.speed);
+        },6000);
+        setTimeout(function(){
+          flowline.opacity= 0.5;
+          console.log(flowline.opacity);
+        },7000);
+        setTimeout(function(){
+          flowline.lineWidth= 40;
+          console.log(flowline.lineWidth);
+        },7000);
+        setTimeout(function(){
+          flowline.show= false;
+          console.log(flowline.show);
+        },8000);
+        setTimeout(function(){
+          flowline.show= true;
+          console.log(flowline.show);
+        },9000);
+        setTimeout(function(){
+          map.remove(flowline);
+        },10000);
       }
 
       //TODO: 删除流动线，需要抽取JS
@@ -203,13 +235,6 @@
     polylineTrailLinkControl.add(polylineTrailLink, 'depthTest').name('深度检测');
     polylineTrailLinkControl.add(polylineTrailLink, 'add');
     // polylineTrailLinkControl.add(polylineTrailLink, 'destroy');
-
-
-    //相机操作
-    //碰撞检测回调
-    map.camera.collision.addEventListener(function(event){
-      console.log(event.position);
-    });
 
     const cameraControl = gui.addFolder('相机');
     const flyto = cameraControl.addFolder('flyTo');
