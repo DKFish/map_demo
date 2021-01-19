@@ -96,11 +96,13 @@
         shadows: false,
       });
 
-      var marker1 = new AirlookMap.Marker({
+      map.stats = false;
+
+      var BaseMarker = new AirlookMap.Marker({
         position: fromDegrees(100.24146629518056, 26.87178535728324, 2584.0673533831427),
         scaleByDistance: new AirlookMap.NearFarScalar(100, 1, 2000, 0.5),
         show: true,
-        label: '基准点',
+        label: '位置参考点',
         onClick: function (e) {
           console.log(e.id);
           console.log(e.position);
@@ -188,7 +190,7 @@
             show: true
           });
         map.add(flowline);
-      },
+      }
 
       //TODO: 删除流动线，需要抽取JS
       // this.destroy = ()=>{
