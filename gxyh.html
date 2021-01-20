@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>内部本地测试用</title>
+   <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #container {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #parameter {
+      position: absolute;
+      left: 100px;
+      top: 0;
+      color: red;
+      font-weight: bolder;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <div id="Stats-output"></div>
+
+  <div id="cesiumContainer" class="fullSize"></div>
+
+  <div id="parameter">
+    <button type="button" id="start" onclick="start()">起飞</button>
+    <button type="button" id="moveForward" onclick="moveForward()">前进</button>
+    <button type="button" id="moveBack" onclick="moveBack()">后退</button>
+    <button type="button" id="turnLeft" onclick="turnLeft()">左转</button>
+    <button type="button" id="turnRight" onclick="turnRight()">右转</button>
+    <button type="button" id="up" onclick="up()">拉升</button>
+    <button type="button" id="down" onclick="down()">下降</button>
+    <button type="button" id="moveDown" onclick="moveDown()">俯冲</button>
+    <button type="button" id="turnRight" onclick="stop()">悬停</button>
+    <lable>飞行速度(KM/H)：<input type="text" id="speed" style="width:50px" value="500"></label>
+      <lable>heading(Degree)：<input type="text" id="turnSpeed" style="width:50px" value="0.5"></label>
+
+
+  </div>
+
+</body>
+<script src="./lib/stats.min.js"></script>
+<!-- <script src="../lib/dat.gui.min.js"></script> -->
+<!-- 儋州线上 -->
+<script  src="https://map.airlook.com/open/auth/api/service/amapmobile?v=1.0.005&appKey=15072b795aa21f522561adfca1c1d78b"></script>
+<!-- <script  src="https://map-test.airlook.com/v1/sdk/amapmobile?v=1.0.004&appKey=7e3aa05dd28eca88aebac6697635ccb8"></script> -->
+<!-- <script src="https://map.airlook.com/open/auth/api/service/amapmobile?v=1.0.006&appKey=354fad7e4d3b138d05009d7eed34eb2b"></script> -->
+<script src="./1.0.006/AMap.js"></script>
+
+<script>
+  var map = new AirlookMap.Map("container")
+  map.readyPromise.then(function (view) {
+    var str = view.setView({
+      center: AirlookMap.Cartographic.fromDegrees(100.23848506577119,26.871084980034272, 3000), //儋州      
+      radius: 2000,
+      maxCameraHeight: 4000
+    });
+    console.log(str);
+    map.mask = false; //去掉模型白色遮罩
+    map.collisionDetection = true; //碰撞检测
+    map.requestRenderMode = true; //是否分时渲染
+    map.camera.pitchUp(THREE.Math.degToRad(90)); //水平设置
+    map.skySphere = new AirlookMap.SkySphere('./images/skysphere1.jpg'); //自定义天空球
+    map.skySphere.show = false;
+    // console.log(map.skySphere.show);
+    // map.skySphere.show = false;
+    console.log(map.skySphere.show);
+  });
+
+  // map.skySphere = new AirlookMap.SkySphere('./images/skysphere1.jpg');
+  // map.skySphere.show = false;
+  // map.stats = true;
+  map.tilesLoaded.addEventListener(function (e) {
+      //禁用鼠标操作
+      map.camera.control.enabled = false;
+      map.camera.setMa
+      console.log("地图已加载完毕！！！！");
+   });
+
+  var keys = {
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    BOTTOM: 40,
+    A: 65,
+    D: 68,
+    W: 87,
+    S: 83,
+    Q: 81,
+    E: 69
+  };
+  var keysDown = {
+    LEFT: false,
+    UP: false,
+    RIGHT: false,
+    BOTTOM: false,
+    A: false,
+    D: false,
+    W: false,
+    S: false,
+    Q: false,
+    E: false
+  };
+
+  function initKeysStatus() {
+    keysDown = {
+      LEFT: false,
+      UP: false,
+      RIGHT: false,
+      BOTTOM: false,
+      A: false,
+      D: false,
+      W: false,
+      S: false,
+      Q: false,
+      E: false
+    };
+  }
+
+  function start() { //起飞
+    keysDown.Q = true;
+    keysDown.W = true;
+    setTimeout(function () {
+      keysDown.Q = false;
+    }, 5000);
+
+
+  }
+
+  function up() { //拉升
+    keysDown.Q = true;
+    setTimeout(function () {
+      keysDown.Q = false;
+      keysDown.W = true;
+    }, 5000);
+
+  }
+
+  function moveDown() { //俯冲
+    keysDown.BOTTOM = true;
+    keysDown.W = true;
+    setTimeout(function () {
+      keysDown.BOTTOM = false;
+    }, 3000);
+  }
+
+  function down() { //下降
+    keysDown.E = true;
+  }
+
+  function turnLeft() {
+    stop()
+    keysDown.W = true;
+    keysDown.LEFT = true;
+  }
+
+  function turnRight() { //右转
+    stop()
+    keysDown.W = true;
+    keysDown.RIGHT = true;
+  }
+
+  function moveForward() { //前进
+    stop()
+    keysDown.W = true;
+  }
+
+  function moveBack() { //后退
+    stop()
+    keysDown.S = true;
+  }
+
+  function stop() { //悬停
+    initKeysStatus();
+  }
+
+  setTimeout(function () {
+
+
+    window.addEventListener('keydown', onKeyDown, false);
+    window.addEventListener('keyup', onKeyUp, false);
+
+    function onKeyDown(event) {
+      var needsUpdate = false;
+      // console.log(event);
+      switch (event.keyCode) {
+
+        case keys.UP:
+          keysDown.UP = true;
+          needsUpdate = true;
+          break;
+
+        case keys.BOTTOM:
+          keysDown.BOTTOM = true;
+          needsUpdate = true;
+          break;
+
+        case keys.LEFT:
+          keysDown.LEFT = true;
+          needsUpdate = true;
+          break;
+
+        case keys.RIGHT:
+          keysDown.RIGHT = true;
+          needsUpdate = true;
+          break;
+
+        case keys.A:
+          keysDown.A = true;
+          needsUpdate = true;
+          break;
+
+        case keys.D:
+          keysDown.D = true;
+          needsUpdate = true;
+          break;
+
+        case keys.W:
+          keysDown.W = true;
+          needsUpdate = true;
+          break;
+
+        case keys.S:
+          keysDown.S = true;
+          needsUpdate = true;
+          break;
+        case keys.Q:
+          keysDown.Q = true;
+          needsUpdate = true;
+          break;
+        case keys.E:
+          keysDown.E = true;
+          needsUpdate = true;
+          break;
+
+      }
+
+      if (needsUpdate) {
+        event.preventDefault();
+      }
+    }
+
+    function onKeyUp(event) {
+      var needsUpdate = false;
+      // console.log(event);
+      var needsUpdate = false;
+      switch (event.keyCode) {
+
+        case keys.UP:
+          keysDown.UP = false;
+          needsUpdate = true;
+          break;
+
+        case keys.BOTTOM:
+          keysDown.BOTTOM = false;
+          needsUpdate = true;
+          break;
+
+        case keys.LEFT:
+          keysDown.LEFT = false;
+          needsUpdate = true;
+          break;
+
+        case keys.RIGHT:
+          keysDown.RIGHT = false;
+          needsUpdate = true;
+          break;
+
+        case keys.A:
+          keysDown.A = false;
+          needsUpdate = true;
+          break;
+
+        case keys.D:
+          keysDown.D = false;
+          needsUpdate = true;
+          break;
+
+        case keys.W:
+          keysDown.W = false;
+          needsUpdate = true;
+          break;
+
+        case keys.S:
+          keysDown.S = false;
+          needsUpdate = true;
+          break;
+        case keys.Q:
+          keysDown.Q = false;
+          needsUpdate = true;
+          break;
+        case keys.E:
+          keysDown.E = false;
+          needsUpdate = true;
+          break;
+      }
+
+      if (needsUpdate) {
+        event.preventDefault();
+      }
+    }
+
+    var angle = THREE.Math.degToRad(0.2);
+    var step = 0.2;
+
+    //帧循环回调
+    function postRender() {
+      // console.log('this is render update test')
+      var speed = window.document.getElementById("speed").value;
+      if (speed !== '') {
+        step = speed * 1000 / 3600 / 50;
+      } else {
+        step = 0.2;
+      }
+
+      var turnSpeed = window.document.getElementById("turnSpeed").value;
+      if (turnSpeed !== '') {
+        angle = THREE.Math.degToRad(turnSpeed);
+      } else {
+        angle = THREE.Math.degToRad(0.2);
+      }
+
+
+
+      if (keysDown.UP) {
+        map.camera.pitchUp(angle);
+      }
+      if (keysDown.BOTTOM) {
+        map.camera.pitchDown(angle);
+      }
+      if (keysDown.LEFT) {
+        map.camera.turnLeft(angle);
+      }
+      if (keysDown.RIGHT) {
+        map.camera.turnRight(angle);
+      }
+      if (keysDown.A) {
+        map.camera.moveLeft(step);
+      }
+      if (keysDown.D) {
+        map.camera.moveRight(step);
+      }
+      if (keysDown.W) {
+        map.camera.moveForward(step);
+      }
+      if (keysDown.S) {
+        map.camera.moveBack(step);
+      }
+      if (keysDown.Q) {
+        map.camera.moveUp(step);
+      }
+      if (keysDown.E) {
+        map.camera.moveDown(step);
+      }
+    }
+
+    map.postRender.addEventListener(function(){
+      postRender();
+    });
+
+    function modelCollision(e) {
+      console.log("撞楼啦！",e);
+      initKeysStatus();
+    }
+
+    //碰撞检测回调
+    map.camera.collision.addEventListener(function(e){
+      console.log("碰撞检测");
+      modelCollision(e);
+    });
+
+
+    map.camera.changed.addEventListener(function (e) {
+      console.log("position: ",e.position,"pitch: ", e.pitch," heading: ", e.heading);
+    });
+
+
+
+  }, 3000)
+
+</script>
+
+</html>

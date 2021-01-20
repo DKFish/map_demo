@@ -80,6 +80,9 @@
 <script src="../lib/dat.gui.min.js"></script>
 <script src="js/camera.js"></script>
 <script src="js/Markers.js"></script>
+<script src="js/PolylineTrailLink.js"></script>
+<script src="js/Polyline.js"></script>
+<script src="js/OverlappingPolygons.js"></script>
 <!-- <script type="text/javascript" src="https://raw.github.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script> -->
 <script >
   //地图加载
@@ -128,10 +131,12 @@
 
     // map.stats = true;
     map.tilesLoaded.addEventListener(function (e) {
+      map.ambientLight.color = "#ae2d2d";
+      map.ambientLight.intensity = 0.6;
       console.log("地图已加载完毕！！！！");
     });
 
-    var gui = new dat.GUI();
+    const gui = new dat.GUI();
     gui.domElement.addEventListener('mousedown',  function(event){
       event.stopImmediatePropagation();//阻止其他事件处理程序被调用
     }, false);
@@ -139,106 +144,47 @@
       event.stopImmediatePropagation();//阻止其他事件处理程序被调用
     }, false);
 
-    // map.shade = true;
     var skyspherecontrol={     
       status: true,
       skysphere: true
     };
    
+    //天空球
     var skyfolder = gui.addFolder("天空球")
-    // 默认值设置
     var dropdown= { 纹理: 'no' };
-    //选项
     var states = ['yes', 'no'];
-
     skyfolder.add( dropdown, '纹理' ).options( states ).onChange( function (status) {
       console.log(states);          
       if(status === 'yes'){
-        map.skySphere =  new AirlookMap.SkySphere('./assets/skysphere1.jpg') ;    
+        map.skySphere =  new AirlookMap.SkySphere('./assets/skysphere1.jpg');
+        // map.skySphere =  new AirlookMap.SkySphere('./assets/skys.jpg');
       }else{
         map.skySphere =  new AirlookMap.SkySphere() ;   
       }
       console.log(map.skySphere.show);
     } );
-
     skyfolder.add(skyspherecontrol, "status").name('是否开启').onChange(function(){
       map.skySphere.show = skyspherecontrol.status;
       console.log(map.skySphere.show)
     });
-
-    const polylineTrailLink = new function() {
-
-      this.depthTest = true;
-
-      this.add = ()=>{
-        let p1 = fromDegrees(100.23192997696852, 26.875955651592196, 2559.80220466822);
-        let p2 = fromDegrees(100.23247717325768, 26.87602849887969, 2561.4129514450237);
-        let p3 = fromDegrees(100.23306656233609, 26.876065018168504, 2551.348304314218);
-        let p4 = fromDegrees(100.233649247421, 26.875980203232064, 2549.5592917467884);
-        let p5 = fromDegrees(100.2337299624449, 26.875523930248054, 2549.287945923655);
-        let p6 = fromDegrees(100.23374069875898, 26.87491457313319, 2550.196806815168);
-        let p7 = fromDegrees(100.23453038255734, 26.874635472560765, 2553.155838822433);
-        let p8 = fromDegrees(100.23519311121628, 26.875007161822932, 2556.511844229068);
-        let p9 = fromDegrees(100.2354684131796, 26.875676651534523, 2558.315293435401);
-        let p10 = fromDegrees(100.23499783582588, 26.87598575132799, 2559.716335356487);
-        let p11 = fromDegrees(100.23413925286674, 26.876243331935587, 2559.716335356487);
-        let p12 = fromDegrees(100.23358377580858, 26.87630712524129, 2551.5355235734714);
-        let points = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12];
-        let flowline = new AirlookMap.PolylineTrailLink({
-            positions: points,
-            imageUrl: "http://amapmobile.airlook.com/1.0.004/Assets/images/arrow.png",
-            color: 'red', //rgb(255,0,0)/0xff0000/'red'
-            lineWidth: 10,
-            opacity: 1,
-            depthTest: this.depthTest,
-            speed: 50,
-            show: true
-          });
-        map.add(flowline);
-        setTimeout(function(){
-          flowline.depthTest= false;
-          console.log(flowline.depthTest);
-        },5000);
-        setTimeout(function(){
-          flowline.speed= 100;
-          console.log(flowline.speed);
-        },6000);
-        setTimeout(function(){
-          flowline.opacity= 0.5;
-          console.log(flowline.opacity);
-        },7000);
-        setTimeout(function(){
-          flowline.lineWidth= 40;
-          console.log(flowline.lineWidth);
-        },7000);
-        setTimeout(function(){
-          flowline.show= false;
-          console.log(flowline.show);
-        },8000);
-        setTimeout(function(){
-          flowline.show= true;
-          console.log(flowline.show);
-        },9000);
-        setTimeout(function(){
-          map.remove(flowline);
-        },10000);
-      }
-
-      //TODO: 删除流动线，需要抽取JS
-      // this.destroy = ()=>{
-      //   map.destroy(flowline);
-      // }
-    }
     
     //流动线
-    var polylineTrailLinkControl = gui.addFolder('流动线');
+    const polylineTrailLinkControl = gui.addFolder('流动线');
     polylineTrailLinkControl.add(polylineTrailLink, 'depthTest').name('深度检测');
     polylineTrailLinkControl.add(polylineTrailLink, 'add');
-    // polylineTrailLinkControl.add(polylineTrailLink, 'destroy');
 
+    //线对象
+    const polylineControl = gui.addFolder('线');
+    // polylineTrailLinkControl.add(polylineTrailLink, 'depthTest').name('深度检测');
+    polylineControl.add(Polyline, 'add');
+
+    //覆盖物
+    const overlappingPolygonsControl = gui.addFolder('覆盖物');
+    overlappingPolygonsControl.add(OverlappingPolygons, 'add');
+
+    //相机飞行
     const cameraControl = gui.addFolder('相机');
     const flyto = cameraControl.addFolder('flyTo');
-
     flyto.add(flyTo, 'longitude').name('经度');
     flyto.add(flyTo, 'latitude').name('维度');
     flyto.add(flyTo, 'height').name('高度');
@@ -246,30 +192,56 @@
     flyto.add(flyTo, 'pitch');
     flyto.add(flyTo, 'flyTo').name('相机飞行');
 
-    //
-    const flytoTarget = cameraControl.addFolder('flyToTarget');
-    flytoTarget.add(flyToTarget, 'longitude').name('经度');
-    flytoTarget.add(flyToTarget, 'latitude').name('维度');
-    flytoTarget.add(flyToTarget, 'height').name('高度');
-    flytoTarget.add(flyToTarget, 'distance').name('距离');
-    flytoTarget.add(flyToTarget, 'heading');
-    flytoTarget.add(flyToTarget, 'pitch');
-    flytoTarget.add(flyToTarget, 'flyToTarget').name('相机飞行');
+    //根据目标飞行
+    const FlytoTarget = cameraControl.addFolder('flyToTarget');
+    FlytoTarget.add(flyToTarget, 'longitude').name('经度');
+    FlytoTarget.add(flyToTarget, 'latitude').name('维度');
+    FlytoTarget.add(flyToTarget, 'height').name('高度');
+    FlytoTarget.add(flyToTarget, 'distance').name('距离');
+    FlytoTarget.add(flyToTarget, 'heading');
+    FlytoTarget.add(flyToTarget, 'pitch');
+    FlytoTarget.add(flyToTarget, 'flyToTarget').name('相机飞行');
 
+    //包围球飞行
+    const FlyToBoundingSphere = cameraControl.addFolder('flyToBoundingSphere');
+    FlyToBoundingSphere.add(flyToBoundingSphere, 'heading');
+    FlyToBoundingSphere.add(flyToBoundingSphere, 'pitch');
+    FlyToBoundingSphere.add(flyToBoundingSphere, 'duration');
+    FlyToBoundingSphere.add(flyToBoundingSphere, 'flyToBoundingSphere').name('相机飞行');
 
+    //相机朝向
+    const lookAtTargetControl = cameraControl.addFolder('lookAtTarget');
+    lookAtTargetControl.add(lookAtTarget, 'longitude').name('经度');
+    lookAtTargetControl.add(lookAtTarget, 'latitude').name('维度');
+    lookAtTargetControl.add(lookAtTarget, 'height').name('高度');
+    lookAtTargetControl.add(lookAtTarget, 'lookAtTarget').name('相机飞行');
+
+    //相机目标位置
+    const cameraPositionFromTargetControl = cameraControl.addFolder('cameraPositionFromTarget');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'longitude').name('经度');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'latitude').name('维度');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'height').name('高度');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'heading').name('方位角');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'pitch').name('俯仰角');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'distance').name('距离');
+    cameraPositionFromTargetControl.add(cameraPositionFromTarget, 'cameraPositionFromTarget').name('相机飞行');
+
+    //基础属性
     const otherControl = {
       collisionDetection: true,
       shade: true,
       shadows: false,
       height: 0.5,
       pitch: 10,
+      intensity: 0.001,
+      color: '#ff0000',
       destroy: ()=>{
         map.destroy();
         reload();
       }
     }
-    //其他
-    var other = gui.addFolder('其他');
+    
+    var other = gui.addFolder('基础属性');
     other.add(otherControl, 'collisionDetection').name("碰撞检测").onChange(function(){
       map.collisionDetection = otherControl.collisionDetection; //碰撞检测
     });
@@ -289,6 +261,14 @@
     
     other.add(otherControl,'pitch', 10, 90).name("最小俯仰").onFinishChange(function(value){
         map.camera.minPitch =THREE.Math.degToRad( otherControl.pitch );
+    });
+
+    other.add(otherControl, 'intensity', 0.001, 1.0).name('环境光强').onFinishChange(function(value){
+      map.ambientLight.intensity = otherControl.intensity;
+    });
+
+    other.add(otherControl, 'color').name('环境光颜色').onFinishChange(function(value){
+      map.ambientLight.color = otherControl.color;
     });
     
     //销毁地图
